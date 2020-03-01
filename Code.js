@@ -62,12 +62,28 @@ function crunch(data) {
             Logger.log('unknown status', status);
         }
     }
-    Logger.log(crunchedData);
-    // {Gina T={remote=0.0, present=2.0, absent=0.0}, Timmy Smith={present=1.0, absent=1.0, remote=0.0}, Shaun R={present=0.0, absent=2.0, remote=0.0}, Suzie Smith={present=2.0, absent=0.0, remote=0.0}, John T={present=2.0, absent=0.0, remote=0.0}, Hector G={remote=1.0, present=1.0, absent=0.0}, ={remote=0.0, present=0.0, absent=0.0}}
+    return crunchedData;
+}
+
+function updateSummary(data) {
+    const ss = SpreadsheetApp.getActive();
+    const summary = ss.getSheetByName('Summary');
+    const names = Object.keys(data);
+    const values = Object.values(data);
+
+    for (let i = 0; i < names.length - 1; i++) { // dont' use the last empty place in arr
+        let name = names[i];
+        let absent = values[i].absent;
+        let remote = values[i].remote;
+        summary.getRange(`A${i + 2}`).setValue(name);
+        summary.getRange(`C${i + 2}`).setValue(absent);
+        summary.getRange(`D${i + 2}`).setValue(remote);
+    };
 }
 
 function main() {
     const data = getAttendanceSheetsData();
     const cleaned = combineAndCleanData(data);
-    crunch(cleaned);
+    const crunched = crunch(cleaned);
+    updateSummary(crunched);
 }
